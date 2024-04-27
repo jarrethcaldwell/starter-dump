@@ -1,0 +1,144 @@
+---
+title: "2021 spring capstone"
+author: "Jarreth Caldwell"
+date: "4/27/2021"
+output: html_document
+---
+```{r message=FALSE, warning=FALSE}
+library(ez)
+library(tidyverse)
+library(viridis)
+```
+
+## Task1
+
+Provide a brief background and significance about a specific research problem that interests you. It could be project you’re involved with now, or a rotation project, or something you’d like to work on. The reader will need to understand enough background to make sense of the experiment you propose below. Keep it brief. In one short paragraph.
+
+### Answer here
+
+**The type I interferon-inducible oligoadenylate synthetase 1 (OAS1) is a template-dependent cytosolic nucleotidyltransferase in humans.  It binds double-stranded RNA and produces secondary messengers 2'-5'-oligoadenylate to activate RNase L which degrades viral and cellular RNA.  Thus, OAS1 is an important player in innate cellular immunity against viruses. However, gain-of-function variants of OAS1 with low-level constitutive activity that cause severe autoimmune disorders have been identified.  Characterizing these GoF variants can provide insight into the mechanisms underlying cytokine dysregulation and inflammation.  The variant currently being studied is OAS1 A76V.**
+
+## Task2
+
+Briefly state something that is unknown about this system that can be discovered through, and leads to, an experiment.  For example, "It is not known whether....."
+
+### Answer here
+
+**It is not known whether there is a molecule that can bind OAS1 A76V's ATP active site and block the GoF activity.  During the production of 2'-5'As, OAS1 and its variants also produce pyrophosphate (PPi) as a byproduct.  PPi can be accurately measured using colorometric assays to quantify OAS1 and OAS1 A76V activity.**
+
+## Task3
+
+Make an “if” “then” prediction that is related to item #2. It should be of the general form, “if X is true, then Y should happen”.
+
+### Answer here
+
+**If a compound binds the OAS1 A76V active site, then production of 2'-5'As should be inhibited.** 
+
+## Task4
+
+What dependent variable will be observed to test this prediction in item #3? What predictor variable will be used to manipulate the system experimentally? Define the inherent properties of these variables (eg, are they sorted, ordered or measured).
+
+### Answer here
+
+**I will observe the quantity of pyrophosphate (PPi) present at the endpoint of my assay - this is a measured variable.  My predictor variable is the potential inhibitor compound added - this is a sorted variable.**
+
+## Task5
+
+Write a statistical hypothesis.  There should be a null and alternate. These should be explicitly consistent with the prediction in item #3 and the response variable in #4. In other words, make sure the statistical hypotheses that you write here serves as a test of a parameter related to the prediction made in item #3.
+
+### Answer here
+
+$H_0: \mu_{c} = \mu_{1} = \mu_{2} = \mu_{3} = \mu_{4}$  
+
+**The mean observed PPi will be equal for all groups.  Here, c is the vehicle control group, and 1, 2, 3, and 4 are the four treatment groups.  We are especially interested in whether any of the treatment group means differ from the control group mean.**
+
+$H_A:$ *the group means are not all equal.* 
+
+**The mean observed PPi will not be equal for all groups.**
+
+## Task6
+
+What is the statistical test you would use to test the hypothesis in item #5? Briefly defend what makes this appropriate for the hypothesis and the experimental variables. If there are alternatives, why is this approach chosen instead? Points will not be awarded if the justification involves something like "because everybody does it this way".
+
+### Answer here
+
+**I would use a related measures One-way ANOVA to test my hypothesis.  I am comparing five test groups, so an ANOVA is required over a t test.  I only have one predictor variable, so a one-way test is in order.  In each test group, I will measure the PPi produced from OAS1 A76V in the presence (or absence) of a potential inhibitor compound.  The OAS1 A76V will all come from the same protein prep, so the measurements are intrinsically linked.**
+
+## Task7
+
+List the decision rules and procedures you have for executing and interpreting the experiment as statistically valid. These procedures range from selection of experimental units, to randomization to primary endpoint to threshold decisions. Define (and defend) what you believe will be the independent replicate.
+
+### Answer here
+
+**In the chromogenic assay, 1mM OAS1 A76V will be incubated wither 1mM potential inhibitor compound or a DMSO vehicle control under activation conditions for 30 minutes.  After 30 minutes, the assay will be worked up, and light absorbance measurements will be taken at a 580nm wavelength.  The observed values will be converted to units of nM PPi.**  
+
+**The assays will be repeated multiple times, and each time, new reagent stocks will be used.  The measurements collected within each treatment group will dependent upon each other. In contrast, the four treatment groups and vehicle control group will be independent replicates, because each will contain an unrelated compound that may affect endpoint measurements of PPi produced.**
+
+## Task8
+
+Produce a graph of a simulation for the expected results. Create a dataMaker-like function in R to create and plot the data. Label and scale any axis. The graph should illustrate the magnitude of the expected response, or the level of response that you expect to see and would be minimally scientifically relevant. Be sure to illustrate any variation that is expected. 
+
+### Answer here
+
+```{r}
+b = 75
+a = 1/10
+f = 1/3
+sd = 15
+n = 3
+sims = 100
+
+negCtrl <- rnorm(n, b, sd) #vehicle, no inhibitor
+posCtrl <- rnorm(n, (b*a), sd) #no ATP
+test1 <- rnorm(n, (b*f), sd) #potential inhibitor
+test2 <- rnorm(n, (b*f), sd) #potential inhibitor
+test3 <- rnorm(n, (b*f), sd) #potential inhibitor
+test4 <- rnorm(n, (b*f), sd) #potential inhibitor
+
+MyDataMaker <- function(n, b, a, f, sd) { 
+negCtrl <- rnorm(n, b, sd) #fill in here - no inhibitor
+posCtrl <- rnorm(n, (b*a), sd) #fill in here - vehicle
+test <- rnorm(n, (b*f), sd) #fill in in here - potential inhibitor
+    Outcome <- c(negCtrl, posCtrl, test1, test2, test3, test4)
+    Predictor <- as.factor(c(rep(c("negCtrl", "posCtrl", "test1", "test2", "test3", "test4"), each = n)))
+    ID <- as.factor(c(1:length(Predictor)))
+    df <-data.frame(ID, Predictor, Outcome)
+}
+
+dat <- MyDataMaker(n,b,a,f,sd)
+ggplot(dat, aes(Predictor, Outcome))+
+  geom_jitter(width=0.1,size = 4, alpha=0.5) +
+  labs(x="Treatment",y="PPi (nmols)")
+```
+
+## Task9
+
+Write and perform a Monte Carlo analysis to calculate a sample size necessary to test the hypothesis. This Monte Carlo must test the primary endpoint.
+
+### Answer here
+
+```{r message=FALSE}
+pval <- replicate(
+  sims, {
+    sample.df <- MyDataMaker(n, b, a, f, sd)
+    sim.ezaov <- ezANOVA(
+            data = sample.df, 
+            wid = ID,
+            dv = Outcome,
+            between = Predictor,
+            type = 2
+            )
+  pval <- sim.ezaov$ANOVA[1,5]
+    }
+  )
+pwr.pct <- sum(pval<0.05)/sims*100
+pwr.pct
+```
+**My power when n=2 is ~79%, and when n=3, it is ~98%.  I will use a sample size of three to test my hypothesis.  Especially since I am not using an animal model, this should not be a problem.  The increase in labor and reagent expenses are not limiting here.**
+
+## Task10
+
+Write up it all in RMarkdown. Code chunks to illustrate specific points are welcome other than for the Monte Carlo code. Knit and submit and upload the html document by the due data. If it is readable to your best friend, it is readable to us.
+
+
+
